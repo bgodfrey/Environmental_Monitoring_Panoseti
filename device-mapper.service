@@ -1,11 +1,11 @@
 [Unit]
 Description=Assign stable lab device symlinks
 After=local-fs.target
-ConditionPathExists=/home/panoseti/Codebase/Environmental_Monitoring_Panoseti/device_mapper.py
+ConditionPathExists=/usr/local/sbin/device_mapper.py
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/python3 /home/panoseti/Codebase/Environmental_Monitoring_Panoseti/device_mapper.py
+ExecStart=/usr/bin/python3 /usr/local/sbin/device_mapper.py
 User=root
 Group=root
 
