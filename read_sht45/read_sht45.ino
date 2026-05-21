@@ -24,12 +24,12 @@ void setup() {
   pixels.clear();
   pixels.show();
 
-  // Initialize SHT45
-  if (!sht4.begin()) {
-    Serial.println("ERROR: Couldn't find SHT4x sensor!");
-    while (1) {
-      delay(1000);
-    }
+  // Initialize SHT45 — retry instead of locking up, and emit a periodic
+  // ERROR line so the host can distinguish "sensor init failed" from
+  // "board not responding."
+  while (!sht4.begin()) {
+    Serial.println("ERROR: Couldn't find SHT4x sensor");
+    delay(1000);
   }
 
   // Highest precision, no heater

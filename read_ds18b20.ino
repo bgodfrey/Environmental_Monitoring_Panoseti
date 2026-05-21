@@ -35,16 +35,21 @@ void setup() {
   Serial.println("DS18B20 Test on QT Py RP2040");
 
   sensors.begin();
-
   int deviceCount = sensors.getDeviceCount();
+
+  // Don't lock up if the DS18B20 isn't wired in yet — keep retrying and
+  // emit a periodic ERROR line so the host can distinguish "no sensor"
+  // from "no board" (both look like silence otherwise).
+  while (deviceCount == 0) {
+    Serial.println("ERROR: No DS18B20 detected");
+    delay(1000);
+    sensors.begin();
+    deviceCount = sensors.getDeviceCount();
+  }
+
   Serial.print("Found ");
   Serial.print(deviceCount);
   Serial.println(" DS18B20 device(s).");
-
-  if (deviceCount == 0) {
-    Serial.println("ERROR: No DS18B20 detected!");
-    while (1) delay(1000);
-  }
 
   // Get address of first sensor
   sensors.getAddress(tempDeviceAddress, 0);
@@ -61,6 +66,21 @@ void setup() {
 void loop() {
   sensors.requestTemperatures(); // tell sensor to perform conversion
   float tempC = sensors.getTempCByIndex(0);
+
+  // Runtime disconnect: DallasTemperature returns DEVICE_DISCONNECTED_C
+  // (-127.0) if the sensor stops responding. Surface that as an ERROR
+  // line instead of printing -127 as if it were a real reading, and try
+  // to rediscover the sensor in case the wire was just bumped.
+  if (tempC == DEVICE_DISCONNECTED_C) {
+    Serial.println("ERROR: DS18B20 disconnected");
+    sensors.begin();
+    if (sensors.getDeviceCount() > 0) {
+      sensors.getAddress(tempDeviceAddress, 0);
+      sensors.setResolution(tempDeviceAddress, 12);
+    }
+    delay(1000);
+    return;
+  }
 
   if(FRIENDLY_FORMAT)
   {
