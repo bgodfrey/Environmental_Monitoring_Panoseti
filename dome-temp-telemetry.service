@@ -1,0 +1,17 @@
+[Unit]
+Description=PANOSETI dome environmental telemetry
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Update these paths on each DAQ node if the checkout, config, or conda
+# environment live somewhere else.
+WorkingDirectory=/home/bgodfrey/Berkeley/Panoseti/Environmental_Monitoring_Panoseti
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/bgodfrey/anaconda3/envs/py312/bin/python /home/bgodfrey/Berkeley/Panoseti/Environmental_Monitoring_Panoseti/dome_telemetry.py --config /home/bgodfrey/Berkeley/Panoseti/Environmental_Monitoring_Panoseti/dome_a.toml
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
